@@ -199,14 +199,20 @@ jobs:
             echo "HAVE_SOURCE_BOOT_IMAGE=true" >> $GITHUB_ENV
         fi
 
-    - name: Setup KernelSU
+    - name: Setup SukiSU Ultra
       if: env.ENABLE_KERNELSU == 'true'
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
-        curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s ${{ env.KERNELSU_TAG }}
-        KSU_VERSION=$(cd KernelSU && expr $(/usr/bin/git rev-list --count HEAD) + 10200)
-        echo "UPLOADNAME=-KernelSU_$KSU_VERSION" >> $GITHUB_ENV
-
+        # 1. 克隆 SukiSU Ultra 源码到 drivers/kernelsu
+        # 提示：确保链接是最新的 SukiSU Ultra 仓库
+        git clone https://github.com/SukiSU-Ultra/SukiSU-Ultra drivers/kernelsu
+        
+        # 2. 将驱动路径写入 Makefile
+        echo "obj-y += kernelsu/" >> drivers/Makefile
+        
+        # 3. 设置上传名称标识
+        echo "UPLOADNAME=-SukiSU-Ultra" >> $GITHUB_ENV
+        
     - name: Setup Configuration for Kernel
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
